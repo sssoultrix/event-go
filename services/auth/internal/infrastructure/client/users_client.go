@@ -1,21 +1,52 @@
 package client
 
-import usersv1 "github.com/sssoultrix/event-go/services/users/pkg/proto/users/v1"
+import (
+	"context"
+
+	usersv1 "github.com/sssoultrix/event-go/contracts/users/pkg/proto/users/v1"
+	"github.com/sssoultrix/event-go/services/auth/internal/domain"
+	"google.golang.org/grpc"
+)
 
 type usersClient struct {
+	client usersv1.UsersServiceClient
 }
 
-func (u usersClient) CreateUser(ctx context.Context, in *usersv1.CreateUserRequest, opts ...grpc.CallOption) (*usersv1.CreateUserResponse, error) {
-	//TODO implement me
-	panic("implement me")
+func NewUsersServiceClient(conn *grpc.ClientConn) domain.UsersService {
+	return &usersClient{
+		client: usersv1.NewUsersServiceClient(conn),
+	}
 }
 
-func (u usersClient) Login(ctx context.Context, in *usersv1.LoginRequest, opts ...grpc.CallOption) (*usersv1.LoginResponse, error) {
-	//TODO implement me
-	panic("implement me")
+// CreateUser делегирует вызов gRPC-клиенту
+func (c *usersClient) Register(ctx context.Context, params domain.CreateUserParams) (*domain.User, error) {
+	resp, err := c.client.CreateUser(ctx, &usersv1.CreateUserRequest{
+		Email:           params.Email,
+		Password:        params.Password,
+		PasswordConfirm: params.PasswordConfirm,
+	})
+	if err != nil {
+		return nil, err // позже маппинг ошибок
+	}
+
+	return &domain.User{
+		ID:        resp.UserId,
+		Email:     resp.Email,
+		CreatedAt: resp.CreatedAt.AsTime(),
+	}, nil
 }
 
-func (u usersClient) DeleteUser(ctx context.Context, in *usersv1.DeleteUserRequest, opts ...grpc.CallOption) (*usersv1.DeleteUserResponse, error) {
-	//TODO implement me
-	panic("implement me")
+func (c *usersClient) Login(ctx context.Context, params domain.LoginParams) (*domain.User, error) {
+	resp, err := c.client.Login(ctx, &usersv1.LoginRequest{
+		Email:    params.Email,
+		Password: params.Password,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.User{
+		ID:    resp.UserId,
+		Email: resp.Email,
+	}, nil
 }

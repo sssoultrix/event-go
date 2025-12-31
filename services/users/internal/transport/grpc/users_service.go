@@ -3,7 +3,7 @@ package grpc
 import (
 	"context"
 
-	usersv1 "github.com/sssoultrix/event-go/services/auth/pkg/proto/users/v1"
+	usersv1 "github.com/sssoultrix/event-go/contracts/users/pkg/proto/users/v1"
 )
 
 type UsersService struct {
