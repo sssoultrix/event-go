@@ -1,0 +1,16 @@
+env: "prod"
+grpc:
+  port: 50051
+  timeout: 5s
+redis:
+  host: "${REDIS_HOST}"
+  port: 6379
+  password: "${REDIS_PASSWORD}"
+  db: 0
+jwt:
+  secret_key: "${JWT_SECRET}"
+  access_token_ttl: 15m
+  refresh_token_ttl: 168h
+clients:
+  users_service:
+    address: "${USERS_SERVICE_ADDRESS}"

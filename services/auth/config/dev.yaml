@@ -1,0 +1,16 @@
+env: "dev"
+grpc:
+  port: 50051
+  timeout: 10s
+redis:
+  host: "redis"
+  port: 6379
+  password: ""
+  db: 0
+jwt:
+  secret_key: "dev-secret-key"
+  access_token_ttl: 15m
+  refresh_token_ttl: 168h
+clients:
+  users_service:
+    address: "users-service:50052"

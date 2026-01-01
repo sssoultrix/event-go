@@ -1,0 +1,12 @@
+env: "prod"
+
+grpc:
+  port: "50051"
+
+postgres:
+  host: "${POSTGRES_HOST}"
+  port: "${POSTGRES_PORT}"
+  user: "${POSTGRES_USER}"
+  password: "${POSTGRES_PASSWORD}"
+  dbname: "${POSTGRES_DB}"
+  sslmode: "require"

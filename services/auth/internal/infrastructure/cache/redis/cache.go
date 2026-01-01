@@ -9,10 +9,10 @@ import (
 )
 
 type Cache struct {
-	client *Client
+	client *goredis.Client
 }
 
-func NewCache(client *Client) *Cache {
+func NewCache(client *goredis.Client) *Cache {
 	return &Cache{client: client}
 }
 

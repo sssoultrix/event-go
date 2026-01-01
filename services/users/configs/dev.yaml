@@ -1,0 +1,12 @@
+env: "dev"
+
+grpc:
+  port: "50051"
+
+postgres:
+  host: "localhost"
+  port: "5432"
+  user: "postgres"
+  password: "postgres"
+  dbname: "event_users_dev"
+  sslmode: "disable"

@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: event_postgres
+    environment:
+      POSTGRES_DB: event_users
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./services/users/migrations:/docker-entrypoint-initdb.d
+    networks:
+      - event_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for Auth Service
+  redis:
+    image: redis:7-alpine
+    container_name: event_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - event_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Users Service
+  users-service:
+    build:
+      context: .
+      dockerfile: ./services/users/Dockerfile
+    container_name: event_users_service
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: event_users
+      POSTGRES_SSLMODE: disable
+    ports:
+      - "50051:50051"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - event_network
+    restart: unless-stopped
+
+  # Auth Service
+  auth-service:
+    build:
+      context: .
+      dockerfile: ./services/auth/Dockerfile
+    container_name: event_auth_service
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      USERS_SERVICE_ADDRESS: users-service:50051
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      JWT_ACCESS_TOKEN_EXPIRATION: 15m
+      JWT_REFRESH_TOKEN_EXPIRATION: 168h
+      GRPC_PORT: 50051
+    ports:
+      - "50052:50051"
+    depends_on:
+      redis:
+        condition: service_healthy
+      users-service:
+        condition: service_started
+    networks:
+      - event_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  event_network:
+    driver: bridge

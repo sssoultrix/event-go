@@ -18,7 +18,6 @@ func NewUsersServiceClient(conn *grpc.ClientConn) domain.UsersService {
 	}
 }
 
-// CreateUser делегирует вызов gRPC-клиенту
 func (c *usersClient) Register(ctx context.Context, params domain.CreateUserParams) (*domain.User, error) {
 	resp, err := c.client.CreateUser(ctx, &usersv1.CreateUserRequest{
 		Email:           params.Email,
@@ -26,7 +25,7 @@ func (c *usersClient) Register(ctx context.Context, params domain.CreateUserPara
 		PasswordConfirm: params.PasswordConfirm,
 	})
 	if err != nil {
-		return nil, err // позже маппинг ошибок
+		return nil, err
 	}
 
 	return &domain.User{
